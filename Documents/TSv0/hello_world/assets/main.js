@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let isSequenceRunning = false;
 
     // Function to update risk score with animation
-    function updateRiskScore(score) {
+    function updateRiskScore(score, riskLevel, color) {
         const scoreDiv = document.querySelector('.text-3xl');
         const riskLevelDiv = document.querySelector('.text-xl');
         
@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(() => {
             scoreDiv.textContent = `${score}%`;
             scoreDiv.style.opacity = '1';
-            riskLevelDiv.textContent = 'Slight Risk';
-            riskLevelDiv.style.color = '#ffc107';
+            riskLevelDiv.textContent = riskLevel;
+            riskLevelDiv.style.color = color;
         }, 2000);
     }
 
@@ -76,38 +76,26 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 50);
     }
 
-    // Function to add conversation section
-    function addConversationSection() {
-        const riskSummary = document.querySelector('.risk-summary');
-        const conversationSection = document.createElement('div');
-        conversationSection.id = 'conversation-section';
-        conversationSection.className = 'risk-section';
-        conversationSection.innerHTML = `
-            <div class="section-header">
-                <span>💬</span>
-                Conversation Behavior
-            </div>
-            <ul style="margin: 0; padding: 0;">
-                <!-- Messages will be added here -->
-            </ul>
-        `;
-        riskSummary.appendChild(conversationSection);
+    // Function to add conversation bullet point
+    function addConversationBulletPoint(text, color) {
+        const section = document.querySelector('#conversation-section ul');
+        if (!section) return;
 
-        // Add streaming animation
-        const streamingDiv = document.createElement('div');
-        streamingDiv.className = 'streaming-animation';
-        streamingDiv.textContent = 'Analyzing conversation';
-        streamingDiv.style.color = '#666';
-        streamingDiv.style.fontStyle = 'italic';
-        streamingDiv.style.padding = '10px';
-        streamingDiv.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        const li = document.createElement('li');
+        li.className = 'bullet-point';
+        li.textContent = text;
+        li.style.color = color;
+        li.style.opacity = '0';
+        li.style.transition = 'opacity 0.5s ease-in';
+        li.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        li.style.fontSize = '14px';
+        li.style.fontWeight = '500';
         
-        const dots = document.createElement('span');
-        dots.className = 'streaming-dots';
-        dots.textContent = '...';
-        streamingDiv.appendChild(dots);
-
-        conversationSection.querySelector('ul').appendChild(streamingDiv);
+        section.appendChild(li);
+        
+        setTimeout(() => {
+            li.style.opacity = '1';
+        }, 50);
     }
 
     // Function to handle the sequence of messages
@@ -117,83 +105,134 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         
-        console.log('Starting message sequence');
-        isSequenceRunning = true;
-
-        // Clear existing content
+        // Only start if section is empty
         const section = document.querySelector('#identity-section ul');
-        if (section) {
-            section.innerHTML = '';
-        }
+        if (section && section.children.length === 0) {
+            console.log('Starting message sequence');
+            isSequenceRunning = true;
 
-        // First message
-        const streamingDiv1 = showStreaming();
-        setTimeout(() => {
-            streamingDiv1.remove();
-            addBulletPoint('Account Creation Velocity: High', '#dc2626');
-            
-            // Second message
-            const streamingDiv2 = showStreaming();
+            // First message
+            const streamingDiv1 = showStreaming();
             setTimeout(() => {
-                streamingDiv2.remove();
-                addBulletPoint('Phone # and Device IP: Known Refund Fraudster', '#dc2626');
+                streamingDiv1.remove();
+                addBulletPoint('Account Creation Velocity: High', '#dc2626');
                 
-                // Third message (new DNA claims bullet)
-                const streamingDiv3 = showStreaming();
+                // Second message
+                const streamingDiv2 = showStreaming();
                 setTimeout(() => {
-                    streamingDiv3.remove();
-                    addBulletPoint('3 DNA refund claims associated with this email detected in cross-merchant network in past week', '#dc2626');
+                    streamingDiv2.remove();
+                    addBulletPoint('Phone # and Device IP: Known Refund Fraudster', '#dc2626');
                     
-                    // Fourth message (updated shipping address mismatch)
-                    const streamingDiv4 = showStreaming();
+                    // Third message
+                    const streamingDiv3 = showStreaming();
                     setTimeout(() => {
-                        streamingDiv4.remove();
-                        addBulletPoint('Shipping Address/Billing Address Mismatch: Medium', '#eab308');
+                        streamingDiv3.remove();
+                        addBulletPoint('3 DNA refund claims associated with this email detected in cross-merchant network in past week', '#dc2626');
                         
-                        // Fifth message
-                        const streamingDiv5 = showStreaming();
+                        // Update risk score to 23% after red bullet points
+                        updateRiskScore(23, 'Slight Risk', '#ffc107');
+                        
+                        // Fourth message
                         setTimeout(() => {
-                            streamingDiv5.remove();
-                            addBulletPoint('Phone #: Linked to Known Telegram Fraudster', '#f97316');
-                            
-                            // Sixth message
-                            const streamingDiv6 = showStreaming();
+                            const streamingDiv4 = showStreaming();
                             setTimeout(() => {
-                                streamingDiv6.remove();
-                                addBulletPoint('Email Linked to Unusual Order Patterns: $500+ value orders followed by refund request', '#f97316');
+                                streamingDiv4.remove();
+                                addBulletPoint('Shipping Address/Billing Address Mismatch: Medium', '#eab308');
                                 
-                                // Update risk score after last bullet point
-                                updateRiskScore(23);
-                                
-                                // Add conversation section after score update
+                                // Fifth message
+                                const streamingDiv5 = showStreaming();
                                 setTimeout(() => {
-                                    addConversationSection();
-                                }, 2000);
-                                
-                                isSequenceRunning = false;
-                                console.log('Sequence complete');
+                                    streamingDiv5.remove();
+                                    addBulletPoint('Phone #: Linked to Known Telegram Fraudster', '#f97316');
+                                    
+                                    // Sixth message
+                                    const streamingDiv6 = showStreaming();
+                                    setTimeout(() => {
+                                        streamingDiv6.remove();
+                                        addBulletPoint('Email Linked to Unusual Order Patterns: 4x $500+ orders followed by refund request detected in 2024', '#f97316');
+                                        
+                                        // Update risk score to 48% after all bullet points
+                                        updateRiskScore(48, 'Elevated Risk', '#f97316');
+                                        
+                                        isSequenceRunning = false;
+                                        console.log('Sequence complete');
+                                    }, 3000);
+                                }, 3000);
                             }, 3000);
-                        }, 3000);
+                        }, 2000);
                     }, 3000);
                 }, 3000);
             }, 3000);
-        }, 3000);
+        }
     }
 
-    // Listen for comments using multiple events to ensure we catch it
-    client.on('comment.text.changed', function(data) {
-        console.log('Comment text changed:', data);
-        startMessageSequence();
-    });
+    // Function to analyze conversation
+    function analyzeConversation(commentText) {
+        const triggerMessage = "Hi Evelyn, I need immediate help! I ordered a pair of jeans and a sweater for my cousin's birthday gift, and my package hasn't arrived when it said it would 3 days ago! I checked my security cameras and nothing has arrived!";
+        
+        if (commentText === triggerMessage) {
+            // Create conversation section if it doesn't exist
+            if (!document.querySelector('#conversation-section')) {
+                const riskSummary = document.querySelector('.risk-summary');
+                const conversationSection = document.createElement('div');
+                conversationSection.id = 'conversation-section';
+                conversationSection.className = 'risk-section';
+                conversationSection.innerHTML = `
+                    <div class="section-header">
+                        <span>💬</span>
+                        Conversation Behavior
+                    </div>
+                    <ul style="margin: 0; padding: 0;"></ul>
+                `;
+                riskSummary.appendChild(conversationSection);
+            }
 
+            const section = document.querySelector('#conversation-section ul');
+            
+            // Show streaming animation
+            const streamingDiv = document.createElement('div');
+            streamingDiv.className = 'streaming-animation';
+            streamingDiv.textContent = 'Analyzing conversation';
+            streamingDiv.style.color = '#666';
+            streamingDiv.style.fontStyle = 'italic';
+            streamingDiv.style.padding = '10px';
+            
+            const dots = document.createElement('span');
+            dots.className = 'streaming-dots';
+            dots.textContent = '...';
+            streamingDiv.appendChild(dots);
+
+            section.appendChild(streamingDiv);
+
+            // Add bullet point after streaming
+            setTimeout(() => {
+                streamingDiv.remove();
+                addConversationBulletPoint('Story Fabrication: High Similarity to Flag Fraudulent Conversations', '#dc2626');
+            }, 3000);
+        }
+    }
+
+    // Listen for comments using multiple events to ensure we catch them
     client.on('ticket.commented', function(data) {
         console.log('Ticket commented:', data);
         startMessageSequence();
     });
 
-    // Log when app is ready
+    client.on('comment.text.changed', function(data) {
+        console.log('Comment text changed:', data);
+        if (data && data.value) {
+            analyzeConversation(data.value);
+        }
+    });
+
+    // Start sequence when app loads
     client.on('app.registered', function() {
         console.log('App registered and ready');
         client.invoke('resize', { width: '100%', height: '600px' });
+        
+        // Start the initial sequence
+        setTimeout(() => {
+            startMessageSequence();
+        }, 1000);
     });
 });
