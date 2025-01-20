@@ -1,19 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello World App</title>
-  <script src="https://static.zdassets.com/zendesk_app_framework_sdk/2.0/zaf_sdk.min.js"></script>
-  <script src="main.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Detection Widget</title>
+    <script src="https://static.zdassets.com/zendesk_app_framework_sdk/2.0/zaf_sdk.min.js"></script>
+    <script src="main.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .risk-section {
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+        }
+
+        .section-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+
+        .risk-meter {
+            text-align: center;
+            margin: 20px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+
+        .text-3xl {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .text-xl {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .bullet-point {
+            margin: 8px 0;
+            padding: 5px;
+            list-style-type: disc;
+            margin-left: 20px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        .streaming-animation {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 10px 0;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .streaming-dots {
+            animation: pulse 1.5s infinite;
+            margin-left: 3px;
+        }
+    </style>
 </head>
 <body>
-  <div id="content">
-    <!-- Content will be injected here -->
-    <p>Waiting for customer message...</p>
-  </div>
-  <noscript>
-    <p>Please enable JavaScript to use this app.</p>
-  </noscript>
+    <div id="app">
+        <!-- Risk Meter -->
+        <div class="risk-meter">
+            <div>
+                <span class="text-3xl">0%</span>
+                <br>
+                <span class="text-xl" style="color: #28a745;">No Risk</span>
+            </div>
+        </div>
+
+        <!-- Risk Summary -->
+        <div class="risk-summary">
+            <h3 style="margin: 20px; font-weight: bold; font-size: 18px;">Risk Summary</h3>
+            
+            <!-- Identity Section -->
+            <div id="identity-section" class="risk-section">
+                <div class="section-header">
+                    <span>🔍</span>
+                    Identity/KYC
+                </div>
+                <ul style="margin: 0; padding: 0;">
+                    <!-- Messages will be added here -->
+                </ul>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
