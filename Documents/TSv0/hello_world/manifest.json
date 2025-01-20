@@ -12,10 +12,6 @@
       "ticket_sidebar": {
         "url": "assets/iframe.html",
         "flexible": true
-      },
-      "new_ticket_sidebar": {
-        "url": "assets/iframe.html",
-        "flexible": true
       }
     }
   },
