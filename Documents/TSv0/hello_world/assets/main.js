@@ -154,6 +154,27 @@ document.addEventListener('DOMContentLoaded', function () {
                                         // Update risk score to 48% after all bullet points
                                         updateRiskScore(48, 'Elevated Risk', '#f97316');
                                         
+                                        // Add conversation section after risk score update
+                                        setTimeout(() => {
+                                            // Create conversation section
+                                            const riskSummary = document.querySelector('.risk-summary');
+                                            const conversationSection = document.createElement('div');
+                                            conversationSection.id = 'conversation-section';
+                                            conversationSection.className = 'risk-section';
+                                            conversationSection.innerHTML = `
+                                                <div class="section-header">
+                                                    <span>💬</span>
+                                                    Conversation Behavior
+                                                </div>
+                                                <ul style="margin: 0; padding: 0;">
+                                                    <div class="streaming-animation" style="color: #666; font-style: italic; padding: 10px;">
+                                                        Analyzing conversation<span class="streaming-dots">...</span>
+                                                    </div>
+                                                </ul>
+                                            `;
+                                            riskSummary.appendChild(conversationSection);
+                                        }, 2000);
+                                        
                                         isSequenceRunning = false;
                                         console.log('Sequence complete');
                                     }, 3000);
@@ -166,30 +187,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Function to analyze conversation
-    function analyzeConversation(commentText) {
-        const triggerMessage = "Hi Evelyn, I need immediate help! I ordered a pair of jeans and a sweater for my cousin's birthday gift, and my package hasn't arrived when it said it would 3 days ago! I checked my security cameras and nothing has arrived!";
-        
-        if (commentText === triggerMessage) {
-            // Create conversation section if it doesn't exist
-            if (!document.querySelector('#conversation-section')) {
-                const riskSummary = document.querySelector('.risk-summary');
-                const conversationSection = document.createElement('div');
-                conversationSection.id = 'conversation-section';
-                conversationSection.className = 'risk-section';
-                conversationSection.innerHTML = `
-                    <div class="section-header">
-                        <span>💬</span>
-                        Conversation Behavior
-                    </div>
-                    <ul style="margin: 0; padding: 0;"></ul>
-                `;
-                riskSummary.appendChild(conversationSection);
+    let isFirstMessageAfterRefresh = true;  // Flag to track first message after refresh
+
+    function analyzeConversation() {
+        if (isFirstMessageAfterRefresh) {
+            console.log('First message after refresh detected');
+            const section = document.querySelector('#conversation-section ul');
+            if (!section) return;
+
+            // Remove existing streaming animation if present
+            const existingStreaming = section.querySelector('.streaming-animation');
+            if (existingStreaming) {
+                existingStreaming.remove();
             }
 
-            const section = document.querySelector('#conversation-section ul');
-            
-            // Show streaming animation
+            // Show new streaming animation
             const streamingDiv = document.createElement('div');
             streamingDiv.className = 'streaming-animation';
             streamingDiv.textContent = 'Analyzing conversation';
@@ -209,19 +221,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 streamingDiv.remove();
                 addConversationBulletPoint('Story Fabrication: High Similarity to Flag Fraudulent Conversations', '#dc2626');
             }, 3000);
+
+            isFirstMessageAfterRefresh = false;  // Reset flag after first message
         }
     }
 
-    // Listen for comments using multiple events to ensure we catch them
-    client.on('ticket.commented', function(data) {
-        console.log('Ticket commented:', data);
-        startMessageSequence();
+    // Listen for new comments using the correct Zendesk events
+    client.on('ticket.reply.created', function(data) {
+        console.log('Reply created:', data);
+        // Get the ticket requester (customer) information
+        client.get('ticket.requester').then(function(requester) {
+            console.log('Ticket requester:', requester);
+            // Get the current user
+            client.get('currentUser').then(function(currentUser) {
+                console.log('Current user:', currentUser);
+                // Check if the message is from the requester (Tiffany)
+                if (currentUser.currentUser.id === requester['ticket.requester'].id) {
+                    analyzeConversation();
+                }
+            });
+        });
     });
 
+    // Keep the existing comment.text.changed listener for the identity sequence
     client.on('comment.text.changed', function(data) {
-        console.log('Comment text changed:', data);
-        if (data && data.value) {
-            analyzeConversation(data.value);
+        console.log('Direct comment changed:', data);
+        // Only start identity sequence if it hasn't run yet
+        const section = document.querySelector('#identity-section ul');
+        if (section && section.children.length === 0) {
+            startMessageSequence();
         }
     });
 
@@ -229,10 +257,9 @@ document.addEventListener('DOMContentLoaded', function () {
     client.on('app.registered', function() {
         console.log('App registered and ready');
         client.invoke('resize', { width: '100%', height: '600px' });
+        startMessageSequence();
         
-        // Start the initial sequence
-        setTimeout(() => {
-            startMessageSequence();
-        }, 1000);
+        // Reset first message flag on app load
+        isFirstMessageAfterRefresh = true;
     });
 });
