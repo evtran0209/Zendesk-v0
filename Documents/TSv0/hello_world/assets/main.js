@@ -166,17 +166,13 @@ document.addEventListener('DOMContentLoaded', function () {
                                                     <span>💬</span>
                                                     Conversation Behavior
                                                 </div>
-                                                <ul style="margin: 0; padding: 0;">
-                                                    <div class="streaming-animation" style="color: #666; font-style: italic; padding: 10px;">
-                                                        Analyzing conversation<span class="streaming-dots">...</span>
-                                                    </div>
-                                                </ul>
+                                                <ul style="margin: 0; padding: 0;"></ul>
                                             `;
                                             riskSummary.appendChild(conversationSection);
+                                            
+                                            isSequenceRunning = false;
+                                            console.log('Sequence complete');
                                         }, 2000);
-                                        
-                                        isSequenceRunning = false;
-                                        console.log('Sequence complete');
                                     }, 3000);
                                 }, 3000);
                             }, 3000);
@@ -190,77 +186,48 @@ document.addEventListener('DOMContentLoaded', function () {
     function analyzeConversation() {
         console.log('Analyzing conversation...');
         
-        // Find the conversation section
-        const riskSummary = document.querySelector('.risk-summary');
-        let conversationSection = document.querySelector('#conversation-section');
-        
-        // Create conversation section if it doesn't exist
-        if (!conversationSection) {
-            console.log('Creating new conversation section');
-            conversationSection = document.createElement('div');
-            conversationSection.id = 'conversation-section';
-            conversationSection.className = 'risk-section';
-            conversationSection.innerHTML = `
-                <div class="section-header">
-                    <span>💬</span>
-                    Conversation Behavior
-                </div>
-                <ul style="margin: 0; padding: 0;"></ul>
-            `;
-            riskSummary.appendChild(conversationSection);
-        }
-
-        // Get or create the ul element
-        let section = conversationSection.querySelector('ul');
+        // Find the existing conversation section
+        const section = document.querySelector('#conversation-section ul');
         if (!section) {
-            section = document.createElement('ul');
-            section.style.margin = '0';
-            section.style.padding = '0';
-            conversationSection.appendChild(section);
+            console.error('Conversation section not found');
+            return;
         }
 
-        // Show streaming animation
-        const streamingDiv = document.createElement('div');
-        streamingDiv.className = 'streaming-animation';
-        streamingDiv.textContent = 'Analyzing conversation';
-        streamingDiv.style.color = '#666';
-        streamingDiv.style.fontStyle = 'italic';
-        streamingDiv.style.padding = '10px';
-        
-        const dots = document.createElement('span');
-        dots.className = 'streaming-dots';
-        dots.textContent = '...';
-        streamingDiv.appendChild(dots);
-
-        // Clear existing content and add streaming
-        section.innerHTML = '';
-        section.appendChild(streamingDiv);
+        // Show analyzing message
+        section.innerHTML = `
+            <div class="streaming-animation" style="color: #666; font-style: italic; padding: 10px;">
+                Analyzing conversation<span class="streaming-dots">...</span>
+            </div>
+        `;
 
         // Add bullet point after delay
         setTimeout(() => {
-            console.log('Adding bullet point');
-            // Clear the streaming animation
+            // Clear the analyzing message
             section.innerHTML = '';
             
-            // Create and add the bullet point
+            // Create and add bullet point
             const bulletPoint = document.createElement('li');
             bulletPoint.className = 'bullet-point';
             bulletPoint.textContent = 'Story Fabrication: High Similarity to Flag Fraudulent Conversations';
-            bulletPoint.style.color = '#dc2626';
-            bulletPoint.style.opacity = '0';
-            bulletPoint.style.transition = 'opacity 0.5s ease-in';
-            bulletPoint.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-            bulletPoint.style.fontSize = '14px';
-            bulletPoint.style.fontWeight = '500';
-            bulletPoint.style.listStyleType = 'disc';
-            bulletPoint.style.marginLeft = '20px';
+            bulletPoint.style.cssText = `
+                color: #dc2626;
+                opacity: 0;
+                transition: opacity 0.5s ease-in;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                font-size: 14px;
+                font-weight: 500;
+                list-style-type: disc;
+                margin-left: 20px;
+                margin-bottom: 8px;
+            `;
             
             section.appendChild(bulletPoint);
             
-            // Fade in
-            setTimeout(() => {
-                bulletPoint.style.opacity = '1';
-            }, 50);
+            // Force a reflow before starting the transition
+            bulletPoint.offsetHeight;
+            bulletPoint.style.opacity = '1';
+            
+            console.log('Bullet point added');
         }, 3000);
     }
 
@@ -276,42 +243,46 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('All comments:', data);
             
             if (data && data['ticket.comments'] && data['ticket.comments'].length > 0) {
-                // Get all comments and sort by timestamp to ensure we get the latest
+                // Get all comments and sort by timestamp
                 const comments = data['ticket.comments'];
                 const sortedComments = comments.sort((a, b) => {
                     return new Date(b.created_at) - new Date(a.created_at);
                 });
                 
-                // Get the most recent comment (first after sorting)
+                // Get the most recent comment
                 const latestComment = sortedComments[0];
                 console.log('Latest comment by timestamp:', latestComment);
                 
-                // Extract plain text from HTML comment
+                // Extract text from HTML and clean it
+                const htmlString = latestComment.value || '';
                 const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = latestComment.value;
-                const commentText = tempDiv.textContent || tempDiv.innerText;
+                tempDiv.innerHTML = htmlString;
+                const textOnly = tempDiv.textContent || tempDiv.innerText || '';
                 
-                console.log('Extracted comment text from latest:', commentText);
+                // Clean both texts for comparison
+                const cleanedComment = textOnly
+                    .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+                    .trim();
+                const cleanedTarget = TARGET_TEXT
+                    .replace(/\s+/g, ' ')
+                    .trim();
                 
-                // Check if it matches our target text
-                if (latestComment.public && commentText) {
-                    // Clean up both texts for comparison (remove extra spaces)
-                    const cleanedComment = commentText.replace(/\s+/g, ' ').trim();
-                    const cleanedTarget = TARGET_TEXT.replace(/\s+/g, ' ').trim();
-                    
-                    console.log('Comparing latest comment:', {
-                        comment: cleanedComment,
-                        target: cleanedTarget,
-                        matches: cleanedComment === cleanedTarget,
-                        timestamp: latestComment.created_at
-                    });
-                    
-                    if (cleanedComment === cleanedTarget) {
-                        console.log('Found matching trigger message in latest comment!');
-                        analyzeConversation();
-                    } else {
-                        console.log('No match in latest comment.');
+                console.log('Text comparison:', {
+                    cleaned: cleanedComment,
+                    target: cleanedTarget,
+                    matches: cleanedComment === cleanedTarget,
+                    length: {
+                        cleaned: cleanedComment.length,
+                        target: cleanedTarget.length
                     }
+                });
+                
+                // Check for match
+                if (cleanedComment === cleanedTarget) {
+                    console.log('Match found! Triggering analysis...');
+                    analyzeConversation();
+                } else {
+                    console.log('No match. Make sure the text matches exactly.');
                 }
             }
         }).catch(function(error) {
