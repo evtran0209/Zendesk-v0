@@ -6,32 +6,22 @@
     <title>TouchStone</title>
     <script src="https://static.zdassets.com/zendesk_app_framework_sdk/2.0/zaf_sdk.min.js"></script>
     <script src="main.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        .risk-section {
-            margin: 20px;
-            padding: 10px;
-            border: 1px solid #eee;
-            border-radius: 5px;
-        }
-
-        .section-header {
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #eee;
-            font-size: 16px;
+            background: #f8fafc;
+            margin: 0;
+            padding: 16px;
         }
 
         .risk-meter {
             text-align: center;
-            margin: 20px;
-            padding: 10px;
-            background: #f5f5f5;
-            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .text-3xl {
@@ -44,13 +34,59 @@
             font-weight: 500;
         }
 
+        .risk-section {
+            background: white;
+            margin-bottom: 16px;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+
         .bullet-point {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 12px;
             margin: 8px 0;
-            padding: 5px;
-            list-style-type: disc;
-            margin-left: 20px;
-            font-weight: 500;
-            font-size: 14px;
+            border-radius: 6px;
+            background: #f8fafc;
+            transition: transform 0.2s;
+        }
+
+        .bullet-point:hover {
+            transform: translateX(4px);
+        }
+
+        .streaming-animation {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8fafc;
+            border-radius: 6px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .streaming-dots {
+            animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
@@ -59,20 +95,130 @@
             100% { opacity: 0.4; }
         }
 
-        .streaming-animation {
+        .quick-actions {
             display: flex;
-            align-items: center;
-            gap: 5px;
-            margin: 10px 0;
-            padding: 5px;
-            background: rgba(0, 0, 0, 0.03);
-            border-radius: 4px;
-            font-size: 14px;
+            gap: 8px;
+            margin-top: 16px;
         }
 
-        .streaming-dots {
-            animation: pulse 1.5s infinite;
-            margin-left: 3px;
+        .action-btn {
+            flex: 1;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn.approve {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .action-btn.verify {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .action-btn.escalate {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(0.95);
+        }
+
+        .risk-card {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .risk-card:hover {
+            transform: translateX(2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .card-header h4 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .card-content p {
+            margin: 0;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .severity-badge {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .severity-badge.high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .severity-badge.medium {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .severity-badge.info {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .action-link {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 8px;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            background: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .action-link:hover {
+            text-decoration: underline;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            margin: -16px -16px 16px -16px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
         }
     </style>
 </head>
@@ -89,18 +235,23 @@
 
         <!-- Risk Summary -->
         <div class="risk-summary">
-            <h3 style="margin: 20px; font-weight: bold; font-size: 18px;">Risk Summary</h3>
-            
             <!-- Identity Section -->
             <div id="identity-section" class="risk-section">
                 <div class="section-header">
-                    <span>🔍</span>
-                    Identity/KYC
+                    <span class="section-icon">🔍</span>
+                    <span class="section-title">Identity/KYC</span>
                 </div>
-                <ul style="margin: 0; padding: 0;">
+                <ul style="margin: 0; padding: 0; list-style: none;">
                     <!-- Messages will be added here -->
                 </ul>
             </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="action-btn approve">✅ Approve</button>
+            <button class="action-btn verify">🔍 Verify</button>
+            <button class="action-btn escalate">⚡ Escalate</button>
         </div>
     </div>
 </body>
