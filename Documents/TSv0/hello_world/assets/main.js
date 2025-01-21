@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Create and add bullet point
             const bulletPoint = document.createElement('li');
             bulletPoint.className = 'bullet-point';
-            bulletPoint.textContent = 'Story Fabrication: High Similarity to Flag Fraudulent Conversations';
+            bulletPoint.textContent = 'Story Fabrication: High Similarity to Flagged Fraudulent Conversations';
             bulletPoint.style.cssText = `
                 color: #dc2626;
                 opacity: 0;
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Define the target text that should trigger the analysis
-    const TARGET_TEXT = "Hi Evelyn, I need immediate help! I ordered a pair of jeans and a sweater for my cousin's birthday gift, and my package hasn't arrived when it said it would 3 days ago! I checked my security cameras and nothing has arrived!";
+    const TARGET_TEXT = "Listen, I ordered a pair of jeans and a sweater for my cousin's birthday gift. Your tracking info says the order was delivered 3 days ago, but I have nothing. I've already checked my security cameras. This is getting ridiculous!!";
 
     // Listen for new ticket comments
     client.on('ticket.comments.changed', function() {
