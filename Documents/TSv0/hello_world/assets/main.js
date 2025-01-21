@@ -187,79 +187,142 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    let isFirstMessageAfterRefresh = true;  // Flag to track first message after refresh
-
     function analyzeConversation() {
-        if (isFirstMessageAfterRefresh) {
-            console.log('First message after refresh detected');
-            const section = document.querySelector('#conversation-section ul');
-            if (!section) return;
-
-            // Remove existing streaming animation if present
-            const existingStreaming = section.querySelector('.streaming-animation');
-            if (existingStreaming) {
-                existingStreaming.remove();
-            }
-
-            // Show new streaming animation
-            const streamingDiv = document.createElement('div');
-            streamingDiv.className = 'streaming-animation';
-            streamingDiv.textContent = 'Analyzing conversation';
-            streamingDiv.style.color = '#666';
-            streamingDiv.style.fontStyle = 'italic';
-            streamingDiv.style.padding = '10px';
-            
-            const dots = document.createElement('span');
-            dots.className = 'streaming-dots';
-            dots.textContent = '...';
-            streamingDiv.appendChild(dots);
-
-            section.appendChild(streamingDiv);
-
-            // Add bullet point after streaming
-            setTimeout(() => {
-                streamingDiv.remove();
-                addConversationBulletPoint('Story Fabrication: High Similarity to Flag Fraudulent Conversations', '#dc2626');
-            }, 3000);
-
-            isFirstMessageAfterRefresh = false;  // Reset flag after first message
+        console.log('Analyzing conversation...');
+        
+        // Find the conversation section
+        const riskSummary = document.querySelector('.risk-summary');
+        let conversationSection = document.querySelector('#conversation-section');
+        
+        // Create conversation section if it doesn't exist
+        if (!conversationSection) {
+            console.log('Creating new conversation section');
+            conversationSection = document.createElement('div');
+            conversationSection.id = 'conversation-section';
+            conversationSection.className = 'risk-section';
+            conversationSection.innerHTML = `
+                <div class="section-header">
+                    <span>💬</span>
+                    Conversation Behavior
+                </div>
+                <ul style="margin: 0; padding: 0;"></ul>
+            `;
+            riskSummary.appendChild(conversationSection);
         }
+
+        // Get or create the ul element
+        let section = conversationSection.querySelector('ul');
+        if (!section) {
+            section = document.createElement('ul');
+            section.style.margin = '0';
+            section.style.padding = '0';
+            conversationSection.appendChild(section);
+        }
+
+        // Show streaming animation
+        const streamingDiv = document.createElement('div');
+        streamingDiv.className = 'streaming-animation';
+        streamingDiv.textContent = 'Analyzing conversation';
+        streamingDiv.style.color = '#666';
+        streamingDiv.style.fontStyle = 'italic';
+        streamingDiv.style.padding = '10px';
+        
+        const dots = document.createElement('span');
+        dots.className = 'streaming-dots';
+        dots.textContent = '...';
+        streamingDiv.appendChild(dots);
+
+        // Clear existing content and add streaming
+        section.innerHTML = '';
+        section.appendChild(streamingDiv);
+
+        // Add bullet point after delay
+        setTimeout(() => {
+            console.log('Adding bullet point');
+            // Clear the streaming animation
+            section.innerHTML = '';
+            
+            // Create and add the bullet point
+            const bulletPoint = document.createElement('li');
+            bulletPoint.className = 'bullet-point';
+            bulletPoint.textContent = 'Story Fabrication: High Similarity to Flag Fraudulent Conversations';
+            bulletPoint.style.color = '#dc2626';
+            bulletPoint.style.opacity = '0';
+            bulletPoint.style.transition = 'opacity 0.5s ease-in';
+            bulletPoint.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+            bulletPoint.style.fontSize = '14px';
+            bulletPoint.style.fontWeight = '500';
+            bulletPoint.style.listStyleType = 'disc';
+            bulletPoint.style.marginLeft = '20px';
+            
+            section.appendChild(bulletPoint);
+            
+            // Fade in
+            setTimeout(() => {
+                bulletPoint.style.opacity = '1';
+            }, 50);
+        }, 3000);
     }
 
-    // Listen for new comments using the correct Zendesk events
-    client.on('ticket.reply.created', function(data) {
-        console.log('Reply created:', data);
-        // Get the ticket requester (customer) information
-        client.get('ticket.requester').then(function(requester) {
-            console.log('Ticket requester:', requester);
-            // Get the current user
-            client.get('currentUser').then(function(currentUser) {
-                console.log('Current user:', currentUser);
-                // Check if the message is from the requester (Tiffany)
-                if (currentUser.currentUser.id === requester['ticket.requester'].id) {
-                    analyzeConversation();
+    // Define the target text that should trigger the analysis
+    const TARGET_TEXT = "Hi Evelyn, I need immediate help! I ordered a pair of jeans and a sweater for my cousin's birthday gift, and my package hasn't arrived when it said it would 3 days ago! I checked my security cameras and nothing has arrived!";
+
+    // Listen for new ticket comments
+    client.on('ticket.comments.changed', function() {
+        console.log('Comments changed - checking for trigger message');
+        
+        // Get all ticket comments
+        client.get('ticket.comments').then(function(data) {
+            console.log('All comments:', data);
+            
+            if (data && data['ticket.comments'] && data['ticket.comments'].length > 0) {
+                // Get all comments and sort by timestamp to ensure we get the latest
+                const comments = data['ticket.comments'];
+                const sortedComments = comments.sort((a, b) => {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                });
+                
+                // Get the most recent comment (first after sorting)
+                const latestComment = sortedComments[0];
+                console.log('Latest comment by timestamp:', latestComment);
+                
+                // Extract plain text from HTML comment
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = latestComment.value;
+                const commentText = tempDiv.textContent || tempDiv.innerText;
+                
+                console.log('Extracted comment text from latest:', commentText);
+                
+                // Check if it matches our target text
+                if (latestComment.public && commentText) {
+                    // Clean up both texts for comparison (remove extra spaces)
+                    const cleanedComment = commentText.replace(/\s+/g, ' ').trim();
+                    const cleanedTarget = TARGET_TEXT.replace(/\s+/g, ' ').trim();
+                    
+                    console.log('Comparing latest comment:', {
+                        comment: cleanedComment,
+                        target: cleanedTarget,
+                        matches: cleanedComment === cleanedTarget,
+                        timestamp: latestComment.created_at
+                    });
+                    
+                    if (cleanedComment === cleanedTarget) {
+                        console.log('Found matching trigger message in latest comment!');
+                        analyzeConversation();
+                    } else {
+                        console.log('No match in latest comment.');
+                    }
                 }
-            });
+            }
+        }).catch(function(error) {
+            console.error('Error getting comments:', error);
         });
     });
 
-    // Keep the existing comment.text.changed listener for the identity sequence
-    client.on('comment.text.changed', function(data) {
-        console.log('Direct comment changed:', data);
-        // Only start identity sequence if it hasn't run yet
-        const section = document.querySelector('#identity-section ul');
-        if (section && section.children.length === 0) {
-            startMessageSequence();
-        }
-    });
-
-    // Start sequence when app loads
+    // Keep existing app.registered event
     client.on('app.registered', function() {
         console.log('App registered and ready');
         client.invoke('resize', { width: '100%', height: '600px' });
         startMessageSequence();
-        
-        // Reset first message flag on app load
-        isFirstMessageAfterRefresh = true;
     });
 });

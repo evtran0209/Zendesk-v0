@@ -1,9 +1,9 @@
 {
-  "name": "Fraud Detection Widget",
+  "name": "TouchStone",
   "author": {
-    "name": "Your Name",
-    "email": "your.email@example.com",
-    "url": ""
+    "name": "Zendesk",
+    "email": "support@zendesk.com",
+    "url": "https://www.zendesk.com"
   },
   "defaultLocale": "en",
   "private": true,
