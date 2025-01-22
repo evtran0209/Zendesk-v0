@@ -293,16 +293,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 analyzeProofOfDelivery();
             }
 
-            // First chargeback threat trigger - shows first card
-            if (cleanedComment.includes("I don't see why I have to go through all this") && 
-                cleanedComment.includes("Fair Credit Billing Act")) {
+            // First chargeback threat trigger
+            if (cleanedComment.includes("I don't see why I have to go through all this")) {
                 console.log('First chargeback threat detected!');
-                analyzeFirstChargebackThreat();
+                analyzeChargebackThreat();
             }
 
-            // Second chargeback threat trigger - shows last two cards
-            if (cleanedComment.includes("I don't have 3-5 days to waste") && 
-                cleanedComment.includes("filing a chargeback")) {
+            // Second chargeback threat trigger
+            if (cleanedComment.includes("I don't have 3-5 days to waste")) {
                 console.log('Second chargeback threat detected!');
                 analyzeSecondChargebackThreat();
             }
@@ -313,8 +311,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // First chargeback threat - single card
-    function analyzeFirstChargebackThreat() {
-        console.log('Analyzing first chargeback threat...');
+    function analyzeChargebackThreat() {
+        console.log('Analyzing chargeback threat...');
         
         const section = document.querySelector('#conversation-section ul');
         if (!section) return;
@@ -341,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
             section.appendChild(cardElement);
 
-            // Update risk score
+            // Update risk score to 72%
             setTimeout(() => {
                 updateRiskScore(72, 'Severe Risk', '#ef4444');
             }, 1000);
