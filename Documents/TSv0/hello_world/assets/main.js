@@ -106,29 +106,28 @@ document.addEventListener('DOMContentLoaded', function () {
         if (section && section.children.length === 0) {
             isSequenceRunning = true;
 
-            // Show analyzing message
+            // Show initial analyzing message
             section.innerHTML = `
                 <div class="streaming-animation">
                     Analyzing customer profile<span class="streaming-dots">...</span>
                 </div>
             `;
 
-            // Add cards one by one with animation
             const identityCards = [
                 {
                     title: 'Account Creation Velocity',
                     detail: 'Multiple accounts created in short timeframe',
-                    severity: 'high'
+                    severity: 'HIGH'
                 },
                 {
                     title: 'Known Fraudster Match',
                     detail: 'Phone # and Device IP match fraud database',
-                    severity: 'high'
+                    severity: 'HIGH'
                 },
                 {
                     title: 'Recent Did-Not-Arrive Claims',
                     detail: '3 claims detected across merchant network (7 days)',
-                    severity: 'high'
+                    severity: 'HIGH'
                 },
                 {
                     title: 'Address Verification',
@@ -138,47 +137,46 @@ document.addEventListener('DOMContentLoaded', function () {
                 {
                     title: 'Telegram Network Match',
                     detail: 'Phone linked to known fraud network',
-                    severity: 'high'
+                    severity: 'medium'
                 },
                 {
                     title: 'Suspicious Order Pattern',
                     detail: '4x $500+ orders with refund requests (2024)',
-                    severity: 'high'
+                    severity: 'HIGH'
                 }
             ];
 
             let currentIndex = 0;
-            
+
             function addNextCard() {
                 if (currentIndex < identityCards.length) {
-                    section.innerHTML = `
-                        <div class="streaming-animation">
-                            Analyzing customer profile<span class="streaming-dots">...</span>
+                    const card = identityCards[currentIndex];
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'risk-card';
+                    cardElement.innerHTML = `
+                        <div class="card-content">
+                            <div class="card-header">
+                                <h4>${card.title}</h4>
+                                <span class="severity-badge ${card.severity.toLowerCase()}">${card.severity}</span>
+                            </div>
+                            <p>${card.detail}</p>
                         </div>
                     `;
+                    section.appendChild(cardElement);
+                    currentIndex++;
 
-                    setTimeout(() => {
-                        const card = identityCards[currentIndex];
-                        const cardElement = document.createElement('div');
-                        cardElement.className = 'risk-card';
-                        cardElement.innerHTML = `
-                            <div class="card-content">
-                                <div class="card-header">
-                                    <h4>${card.title}</h4>
-                                    <span class="severity-badge ${card.severity}">${card.severity}</span>
-                                </div>
-                                <p>${card.detail}</p>
-                            </div>
-                        `;
-                        section.appendChild(cardElement);
-                        currentIndex++;
-                        if (currentIndex < identityCards.length) {
-                            addNextCard();
-                        } else {
-                            // All cards added, update risk score
-                            updateRiskScore(48, 'Elevated Risk', '#f97316');
-                            
-                            // Add conversation section
+                    // Update risk score after the first three cards
+                    if (currentIndex === 3) {
+                        updateRiskScore(28, 'Slight Risk', '#eab308');
+                    }
+
+                    // Check if we've added all cards
+                    if (currentIndex === identityCards.length) {
+                        // Update to elevated risk after last card
+                        updateRiskScore(48, 'Elevated Risk', '#f97316');
+                        
+                        // Add conversation section
+                        setTimeout(() => {
                             const riskSummary = document.querySelector('.risk-summary');
                             const conversationSection = document.createElement('div');
                             conversationSection.id = 'conversation-section';
@@ -190,34 +188,64 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <ul style="margin: 0; padding: 0; list-style: none;"></ul>
                             `;
                             riskSummary.appendChild(conversationSection);
-                            
                             isSequenceRunning = false;
-                        }
-                    }, 3000);
+                        }, 1000);
+                    } else {
+                        // Show analyzing animation before next card
+                        const streamingDiv = document.createElement('div');
+                        streamingDiv.className = 'streaming-animation';
+                        streamingDiv.innerHTML = 'Analyzing customer profile<span class="streaming-dots">...</span>';
+                        section.appendChild(streamingDiv);
+
+                        setTimeout(() => {
+                            streamingDiv.remove();
+                            addNextCard();
+                        }, 2000);
+                    }
                 }
             }
 
-            addNextCard();
+            // Start adding cards after initial delay
+            setTimeout(() => {
+                section.innerHTML = ''; // Clear initial analyzing message
+                addNextCard();
+            }, 2000);
         }
     }
 
     function analyzeConversation() {
         console.log('Analyzing conversation...');
         
-        const section = document.querySelector('#conversation-section ul');
+        // First, check if conversation section exists, if not create it
+        let conversationSection = document.querySelector('#conversation-section');
+        if (!conversationSection) {
+            const riskSummary = document.querySelector('.risk-summary');
+            conversationSection = document.createElement('div');
+            conversationSection.id = 'conversation-section';
+            conversationSection.className = 'risk-section';
+            conversationSection.innerHTML = `
+                <div class="section-header">
+                    <span class="section-title">Conversation Analysis</span>
+                </div>
+                <ul style="margin: 0; padding: 0; list-style: none;"></ul>
+            `;
+            riskSummary.appendChild(conversationSection);
+        }
+
+        const section = conversationSection.querySelector('ul');
         if (!section) return;
 
         // Show analyzing message
-        section.innerHTML = `
-            <div class="streaming-animation">
-                Analyzing conversation<span class="streaming-dots">...</span>
-            </div>
-        `;
+        const streamingDiv = document.createElement('div');
+        streamingDiv.className = 'streaming-animation';
+        streamingDiv.innerHTML = `Analyzing conversation<span class="streaming-dots">...</span>`;
+        section.appendChild(streamingDiv);
 
-        // Add only Story Fabrication card after delay
+        // Add analysis after delay
         setTimeout(() => {
-            section.innerHTML = '';
+            streamingDiv.remove();
             
+            // Add only the Story Fabrication card
             const cardElement = document.createElement('div');
             cardElement.className = 'risk-card';
             cardElement.innerHTML = `
@@ -233,52 +261,77 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 3000);
     }
 
-    // Define trigger messages
-    const TARGET_TEXT = "Listen, I ordered a pair of jeans and a sweater for my cousin's birthday gift. Your tracking info says the order was delivered 3 days ago, but I have nothing. I've already checked my security cameras. This is getting ridiculous!!";
-    
-    const PROOF_DELIVERY_TEXT = "Yes, that's correct. And before you suggest it, I've already done all the typical checks-porch, neighbors, mailroom. There's nothing here!";
-    
-    const CHARGEBACK_THREAT_TEXT = "I don't see why I have to go through all this. My package never arrived and I am entitled to a full refund compensation. I already told you it's not here! If you don't process my refund immediately, I'll just contact my bank. I know the Fair Credit Billing Act, and I can dispute this charge easily.";
-    
-    const CHARGEBACK_THREAT_TEXT_2 = "I don't have 3-5 days to waste. Other companies have refunded me instantly for missing packages. Why are you making this so complicated? If I don't see immediate action, I'm filing a chargeback-I've done this before, and I'm not afraid to use that option.";
-
-    // Listen for new ticket comments
+    // Update the ticket.comments.changed handler
     client.on('ticket.comments.changed', function() {
         console.log('Comments changed - checking for trigger messages');
         
         client.get('ticket.comments').then(function(data) {
-            if (data && data['ticket.comments'] && data['ticket.comments'].length > 0) {
-                const latestComment = data['ticket.comments'][data['ticket.comments'].length - 1];
-                const cleanedComment = latestComment.text.replace(/\s+/g, ' ').trim();
-                
-                // Check for first trigger (Story Fabrication)
-                const cleanedTarget = TARGET_TEXT.replace(/\s+/g, ' ').trim();
-                if (cleanedComment === cleanedTarget) {
-                    console.log('Story fabrication trigger found! Starting analysis...');
-                    analyzeConversation();
-                }
-
-                // Check for proof of delivery trigger
-                const cleanedProofTarget = PROOF_DELIVERY_TEXT.replace(/\s+/g, ' ').trim();
-                if (cleanedComment === cleanedProofTarget) {
-                    console.log('Proof of delivery trigger found! Starting verification...');
-                    analyzeProofOfDelivery();
-                }
-
-                // Check for first chargeback threat trigger
-                const cleanedChargebackTarget = CHARGEBACK_THREAT_TEXT.replace(/\s+/g, ' ').trim();
-                if (cleanedComment === cleanedChargebackTarget) {
-                    console.log('Chargeback threat detected! Adding warning indicators...');
-                    analyzeChargebackThreat();
-                }
-
-                // Check for second chargeback threat trigger
-                const cleanedChargebackTarget2 = CHARGEBACK_THREAT_TEXT_2.replace(/\s+/g, ' ').trim();
-                if (cleanedComment === cleanedChargebackTarget2) {
-                    console.log('Second chargeback threat detected! Adding warning indicator...');
-                    analyzeSecondChargebackThreat();
-                }
+            console.log('Received ticket data:', data);
+            
+            if (!data || !data['ticket.comments']) {
+                console.log('No ticket comments found');
+                return;
             }
+
+            // Get all comments and sort by timestamp to ensure we get the latest
+            const comments = data['ticket.comments'];
+            const sortedComments = comments.sort((a, b) => {
+                return new Date(b.created_at) - new Date(a.created_at);
+            });
+
+            // Get the most recent comment
+            const latestComment = sortedComments[0];
+            console.log('Latest comment by timestamp:', latestComment);
+
+            // Extract text from HTML and clean it
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = latestComment.value || '';
+            const textOnly = tempDiv.textContent || tempDiv.innerText || '';
+
+            // Clean up the text
+            const cleanedComment = textOnly
+                .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+                .trim();
+
+            console.log('Cleaned comment text:', cleanedComment);
+
+            // Define trigger texts
+            const TARGET_TEXT = "Listen, I ordered a pair of jeans and a sweater for my cousin's birthday gift. Your tracking info says the order was delivered 3 days ago, but I have nothing. I've already checked my security cameras. This is getting ridiculous!!";
+            const cleanedTarget = TARGET_TEXT.replace(/\s+/g, ' ').trim();
+
+            console.log('Text comparison:', {
+                cleaned: cleanedComment,
+                target: cleanedTarget,
+                matches: cleanedComment === cleanedTarget,
+                length: {
+                    cleaned: cleanedComment.length,
+                    target: cleanedTarget.length
+                }
+            });
+
+            // Check for exact match
+            if (cleanedComment === cleanedTarget) {
+                console.log('Match found! Triggering analysis...');
+                analyzeConversation();
+            }
+
+            // Keep existing trigger checks
+            if (cleanedComment.includes("Yes, that's correct. And before you suggest it")) {
+                console.log('Proof of delivery trigger found!');
+                analyzeProofOfDelivery();
+            }
+
+            if (cleanedComment.includes("I don't see why I have to go through all this")) {
+                console.log('Chargeback threat detected!');
+                analyzeChargebackThreat();
+            }
+
+            if (cleanedComment.includes("I don't have 3-5 days to waste")) {
+                console.log('Second chargeback threat detected!');
+                analyzeSecondChargebackThreat();
+            }
+        }).catch(function(error) {
+            console.error('Error getting ticket comments:', error);
         });
     });
 
@@ -331,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="card-content">
                         <div class="card-header">
                             <h4>${card.title}</h4>
-                            <span class="severity-badge ${card.severity}">${card.severity}</span>
+                            <span class="severity-badge ${card.severity.toLowerCase()}">${card.severity}</span>
                         </div>
                         <p>${card.detail}</p>
                     </div>
@@ -376,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Example of a more concise card-based bullet point
     function createRiskCard(data) {
         const card = document.createElement('div');
-        card.className = `risk-card ${data.severity}-risk`;
+        card.className = `risk-card ${data.severity.toLowerCase()}-risk`;
         
         card.innerHTML = `
             <div class="flex items-center justify-between">
@@ -538,7 +591,6 @@ document.addEventListener('DOMContentLoaded', function () {
             proofSection.className = 'risk-section';
             proofSection.innerHTML = `
                 <div class="section-header">
-                    <span class="section-icon">📦</span>
                     <span class="section-title">Proof of Delivery</span>
                 </div>
                 <ul style="margin: 0; padding: 0; list-style: none;"></ul>
@@ -549,51 +601,75 @@ document.addEventListener('DOMContentLoaded', function () {
         const section = proofSection.querySelector('ul');
         if (!section) return;
 
+        // Show initial streaming animation
         section.innerHTML = `
             <div class="streaming-animation">
                 Verifying delivery<span class="streaming-dots">...</span>
             </div>
         `;
 
+        const deliveryCards = [
+            {
+                title: 'Delivery Status',
+                detail: 'Package was delivered with photo evidence',
+                severity: 'info',
+                action: {
+                    text: 'View Photo',
+                    handler: 'viewDeliveryPhoto()'
+                }
+            },
+            {
+                title: 'Claim Verification',
+                detail: 'Did-Not-Arrive claim conflicts with tracking data',
+                severity: 'HIGH'
+            }
+        ];
+
+        // Add first card after initial streaming
         setTimeout(() => {
             section.innerHTML = '';
-            
-            const deliveryCards = [
-                {
-                    title: 'Delivery Status',
-                    detail: 'Package was delivered with photo evidence',
-                    severity: 'info',
-                    action: {
-                        text: 'View Photo',
-                        handler: 'viewDeliveryPhoto()'
-                    }
-                },
-                {
-                    title: 'Claim Verification',
-                    detail: 'Did-Not-Arrive claim conflicts with tracking data',
-                    severity: 'high'
-                }
-            ];
+            const card1 = deliveryCards[0];
+            const cardElement1 = document.createElement('div');
+            cardElement1.className = 'risk-card';
+            cardElement1.innerHTML = `
+                <div class="card-content">
+                    <div class="card-header">
+                        <h4>${card1.title}</h4>
+                        <span class="severity-badge ${card1.severity.toLowerCase()}">${card1.severity}</span>
+                    </div>
+                    <p>${card1.detail}</p>
+                    ${card1.action ? `
+                        <button onclick="${card1.action.handler}" class="action-link">
+                            ${card1.action.text}
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+            section.appendChild(cardElement1);
 
-            deliveryCards.forEach(card => {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'risk-card';
-                cardElement.innerHTML = `
+            // Show streaming animation before second card
+            const streamingDiv = document.createElement('div');
+            streamingDiv.className = 'streaming-animation';
+            streamingDiv.innerHTML = `Verifying delivery<span class="streaming-dots">...</span>`;
+            section.appendChild(streamingDiv);
+
+            // Add second card after streaming
+            setTimeout(() => {
+                streamingDiv.remove();
+                const card2 = deliveryCards[1];
+                const cardElement2 = document.createElement('div');
+                cardElement2.className = 'risk-card';
+                cardElement2.innerHTML = `
                     <div class="card-content">
                         <div class="card-header">
-                            <h4>${card.title}</h4>
-                            <span class="severity-badge ${card.severity}">${card.severity}</span>
+                            <h4>${card2.title}</h4>
+                            <span class="severity-badge ${card2.severity.toLowerCase()}">${card2.severity}</span>
                         </div>
-                        <p>${card.detail}</p>
-                        ${card.action ? `
-                            <button onclick="${card.action.handler}" class="action-link">
-                                ${card.action.text}
-                            </button>
-                        ` : ''}
+                        <p>${card2.detail}</p>
                     </div>
                 `;
-                section.appendChild(cardElement);
-            });
-        }, 3000);
+                section.appendChild(cardElement2);
+            }, 2000);
+        }, 2000);
     }
 });

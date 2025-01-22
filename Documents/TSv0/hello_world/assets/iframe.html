@@ -220,6 +220,43 @@
             font-weight: 600;
             color: #374151;
         }
+
+        .stream-text {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        
+        .bullet-card {
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+        
+        .bullet-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        
+        .bullet-card ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .bullet-card li {
+            margin: 5px 0;
+        }
+
+        .text-xl[style*="Slight Risk"] {
+            color: #eab308 !important; /* Yellow color for Slight Risk */
+        }
+
+        .text-xl[style*="Elevated Risk"] {
+            color: #f97316 !important; /* Orange color for Elevated Risk */
+        }
     </style>
 </head>
 <body>
@@ -254,5 +291,33 @@
             <button class="action-btn escalate">⚡ Escalate</button>
         </div>
     </div>
+
+    <script>
+        client.on('streamText', function(text) {
+            const streamDiv = document.createElement('div');
+            streamDiv.className = 'stream-text';
+            streamDiv.textContent = text;
+            document.body.appendChild(streamDiv);
+        });
+
+        client.on('showBulletCard', function(data) {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'bullet-card';
+            
+            const title = document.createElement('h3');
+            title.textContent = data.title;
+            cardDiv.appendChild(title);
+            
+            const list = document.createElement('ul');
+            data.bullets.forEach(bullet => {
+                const li = document.createElement('li');
+                li.textContent = bullet;
+                list.appendChild(li);
+            });
+            cardDiv.appendChild(list);
+            
+            document.body.appendChild(cardDiv);
+        });
+    </script>
 </body>
 </html>
