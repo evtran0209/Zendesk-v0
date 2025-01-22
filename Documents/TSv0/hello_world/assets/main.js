@@ -278,7 +278,9 @@ document.addEventListener('DOMContentLoaded', function () {
             tempDiv.innerHTML = latestComment.value || '';
             const cleanedComment = tempDiv.textContent.replace(/\s+/g, ' ').trim();
 
-            // First trigger - Story Fabrication
+            console.log('Latest cleaned comment:', cleanedComment);
+
+            // Story Fabrication trigger
             const TARGET_TEXT = "Listen, I ordered a pair of jeans and a sweater for my cousin's birthday gift. Your tracking info says the order was delivered 3 days ago, but I have nothing. I've already checked my security cameras. This is getting ridiculous!!";
             if (cleanedComment === TARGET_TEXT.replace(/\s+/g, ' ').trim()) {
                 console.log('Story fabrication trigger found!');
@@ -286,57 +288,95 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Proof of delivery trigger
-            const PROOF_DELIVERY_TEXT = "Yes, that's correct. And before you suggest it, I've already done all the typical checks-porch, neighbors, mailroom. There's nothing here!";
-            if (cleanedComment === PROOF_DELIVERY_TEXT.replace(/\s+/g, ' ').trim()) {
+            if (cleanedComment.includes("Yes, that's correct. And before you suggest it")) {
                 console.log('Proof of delivery trigger found!');
                 analyzeProofOfDelivery();
             }
 
-            // Chargeback threat trigger
-            const CHARGEBACK_TEXT = "I don't see why I have to go through all this. My package never arrived and I am entitled to a full refund compensation. I already told you it's not here! If you don't process my refund immediately, I'll just contact my bank. I know the Fair Credit Billing Act, and I can dispute this charge easily.";
-            if (cleanedComment === CHARGEBACK_TEXT.replace(/\s+/g, ' ').trim()) {
-                console.log('Chargeback threat detected!');
-                analyzeChargebackThreat();
+            // First chargeback threat trigger - shows first card
+            if (cleanedComment.includes("I don't see why I have to go through all this") && 
+                cleanedComment.includes("Fair Credit Billing Act")) {
+                console.log('First chargeback threat detected!');
+                analyzeFirstChargebackThreat();
             }
+
+            // Second chargeback threat trigger - shows last two cards
+            if (cleanedComment.includes("I don't have 3-5 days to waste") && 
+                cleanedComment.includes("filing a chargeback")) {
+                console.log('Second chargeback threat detected!');
+                analyzeSecondChargebackThreat();
+            }
+
         }).catch(function(error) {
             console.error('Error getting ticket comments:', error);
         });
     });
 
-    // Keep existing app.registered event
-    client.on('app.registered', function() {
-        console.log('App registered and ready');
-        client.invoke('resize', { width: '100%', height: '600px' });
-        startMessageSequence();
-    });
-
-    // Update the analyzeChargebackThreat function
-    function analyzeChargebackThreat() {
-        console.log('Analyzing chargeback threat...');
+    // First chargeback threat - single card
+    function analyzeFirstChargebackThreat() {
+        console.log('Analyzing first chargeback threat...');
         
         const section = document.querySelector('#conversation-section ul');
         if (!section) return;
 
-        const bulletPoints = [
+        // Show initial streaming animation
+        const streamingDiv = document.createElement('div');
+        streamingDiv.className = 'streaming-animation';
+        streamingDiv.innerHTML = `Analyzing conversation<span class="streaming-dots">...</span>`;
+        section.appendChild(streamingDiv);
+
+        setTimeout(() => {
+            streamingDiv.remove();
+            
+            const cardElement = document.createElement('div');
+            cardElement.className = 'risk-card';
+            cardElement.innerHTML = `
+                <div class="card-content">
+                    <div class="card-header">
+                        <h4>Chargeback Threat Detected</h4>
+                        <span class="severity-badge high">HIGH</span>
+                    </div>
+                    <p>Customer threatened chargeback actions to 1 other retailer in network this week</p>
+                </div>
+            `;
+            section.appendChild(cardElement);
+
+            // Update risk score
+            setTimeout(() => {
+                updateRiskScore(72, 'Severe Risk', '#ef4444');
+            }, 1000);
+        }, 3000);
+    }
+
+    // Second chargeback threat - two additional cards
+    function analyzeSecondChargebackThreat() {
+        console.log('Analyzing second chargeback threat...');
+        
+        const section = document.querySelector('#conversation-section ul');
+        if (!section) return;
+
+        const streamingDiv = document.createElement('div');
+        streamingDiv.className = 'streaming-animation';
+        streamingDiv.innerHTML = `Analyzing conversation<span class="streaming-dots">...</span>`;
+        section.appendChild(streamingDiv);
+
+        const additionalCards = [
             {
-                text: 'Customer is threatening chargeback action',
+                title: 'Refund Demand Pattern',
+                detail: 'Immediate refund demand with legal pressure. Pattern linked to Device IP',
                 severity: 'HIGH'
             },
             {
-                text: 'Shows detailed knowledge of Fair Credit Billing Act',
-                severity: 'HIGH'
-            },
-            {
-                text: 'History of successful chargebacks detected',
+                title: 'Urgency Pattern',
+                detail: 'High pressure tactics and previous chargeback history',
                 severity: 'HIGH'
             }
         ];
 
         let currentIndex = 0;
 
-        function addNextBulletPoint() {
-            if (currentIndex < bulletPoints.length) {
-                // Show streaming animation
+        function addNextCard() {
+            if (currentIndex < additionalCards.length) {
                 const streamingDiv = document.createElement('div');
                 streamingDiv.className = 'streaming-animation';
                 streamingDiv.innerHTML = `Analyzing conversation<span class="streaming-dots">...</span>`;
@@ -345,36 +385,47 @@ document.addEventListener('DOMContentLoaded', function () {
                 setTimeout(() => {
                     streamingDiv.remove();
                     
-                    const bulletPoint = bulletPoints[currentIndex];
+                    const card = additionalCards[currentIndex];
                     const cardElement = document.createElement('div');
                     cardElement.className = 'risk-card';
                     cardElement.innerHTML = `
                         <div class="card-content">
                             <div class="card-header">
-                                <h4>${bulletPoint.text}</h4>
-                                <span class="severity-badge ${bulletPoint.severity.toLowerCase()}">${bulletPoint.severity}</span>
+                                <h4>${card.title}</h4>
+                                <span class="severity-badge ${card.severity.toLowerCase()}">${card.severity}</span>
                             </div>
+                            <p>${card.detail}</p>
                         </div>
                     `;
                     section.appendChild(cardElement);
                     currentIndex++;
 
-                    // If this was the last bullet point, update risk score
-                    if (currentIndex === bulletPoints.length) {
+                    // Update risk score after last card to 85%
+                    if (currentIndex === additionalCards.length) {
                         setTimeout(() => {
-                            updateRiskScore(72, 'Severe Risk', '#ef4444');
+                            updateRiskScore(85, 'Critical Risk', '#dc2626');
                         }, 1000);
                     } else {
-                        addNextBulletPoint();
+                        setTimeout(() => {
+                            addNextCard();
+                        }, 3000);
                     }
-                }, 2000);
+                }, 3000);
             }
         }
 
-        // Start the sequence
-        section.innerHTML = '';
-        addNextBulletPoint();
+        setTimeout(() => {
+            streamingDiv.remove();
+            addNextCard();
+        }, 2000);
     }
+
+    // Keep existing app.registered event
+    client.on('app.registered', function() {
+        console.log('App registered and ready');
+        client.invoke('resize', { width: '100%', height: '600px' });
+        startMessageSequence();
+    });
 
     // Example of a more concise card-based bullet point
     function createRiskCard(data) {
