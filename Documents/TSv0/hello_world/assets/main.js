@@ -266,69 +266,37 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Comments changed - checking for trigger messages');
         
         client.get('ticket.comments').then(function(data) {
-            console.log('Received ticket data:', data);
-            
-            if (!data || !data['ticket.comments']) {
-                console.log('No ticket comments found');
-                return;
-            }
+            if (!data || !data['ticket.comments']) return;
 
-            // Get all comments and sort by timestamp to ensure we get the latest
             const comments = data['ticket.comments'];
             const sortedComments = comments.sort((a, b) => {
                 return new Date(b.created_at) - new Date(a.created_at);
             });
-
-            // Get the most recent comment
+            
             const latestComment = sortedComments[0];
-            console.log('Latest comment by timestamp:', latestComment);
-
-            // Extract text from HTML and clean it
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = latestComment.value || '';
-            const textOnly = tempDiv.textContent || tempDiv.innerText || '';
+            const cleanedComment = tempDiv.textContent.replace(/\s+/g, ' ').trim();
 
-            // Clean up the text
-            const cleanedComment = textOnly
-                .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
-                .trim();
-
-            console.log('Cleaned comment text:', cleanedComment);
-
-            // Define trigger texts
+            // First trigger - Story Fabrication
             const TARGET_TEXT = "Listen, I ordered a pair of jeans and a sweater for my cousin's birthday gift. Your tracking info says the order was delivered 3 days ago, but I have nothing. I've already checked my security cameras. This is getting ridiculous!!";
-            const cleanedTarget = TARGET_TEXT.replace(/\s+/g, ' ').trim();
-
-            console.log('Text comparison:', {
-                cleaned: cleanedComment,
-                target: cleanedTarget,
-                matches: cleanedComment === cleanedTarget,
-                length: {
-                    cleaned: cleanedComment.length,
-                    target: cleanedTarget.length
-                }
-            });
-
-            // Check for exact match
-            if (cleanedComment === cleanedTarget) {
-                console.log('Match found! Triggering analysis...');
+            if (cleanedComment === TARGET_TEXT.replace(/\s+/g, ' ').trim()) {
+                console.log('Story fabrication trigger found!');
                 analyzeConversation();
             }
 
-            // Keep existing trigger checks
-            if (cleanedComment.includes("Yes, that's correct. And before you suggest it")) {
+            // Proof of delivery trigger
+            const PROOF_DELIVERY_TEXT = "Yes, that's correct. And before you suggest it, I've already done all the typical checks-porch, neighbors, mailroom. There's nothing here!";
+            if (cleanedComment === PROOF_DELIVERY_TEXT.replace(/\s+/g, ' ').trim()) {
                 console.log('Proof of delivery trigger found!');
                 analyzeProofOfDelivery();
             }
 
-            if (cleanedComment.includes("I don't see why I have to go through all this")) {
+            // Chargeback threat trigger
+            const CHARGEBACK_TEXT = "I don't see why I have to go through all this. My package never arrived and I am entitled to a full refund compensation. I already told you it's not here! If you don't process my refund immediately, I'll just contact my bank. I know the Fair Credit Billing Act, and I can dispute this charge easily.";
+            if (cleanedComment === CHARGEBACK_TEXT.replace(/\s+/g, ' ').trim()) {
                 console.log('Chargeback threat detected!');
                 analyzeChargebackThreat();
-            }
-
-            if (cleanedComment.includes("I don't have 3-5 days to waste")) {
-                console.log('Second chargeback threat detected!');
-                analyzeSecondChargebackThreat();
             }
         }).catch(function(error) {
             console.error('Error getting ticket comments:', error);
@@ -342,88 +310,70 @@ document.addEventListener('DOMContentLoaded', function () {
         startMessageSequence();
     });
 
-    // Add new function to handle chargeback threat analysis
+    // Update the analyzeChargebackThreat function
     function analyzeChargebackThreat() {
         console.log('Analyzing chargeback threat...');
         
         const section = document.querySelector('#conversation-section ul');
         if (!section) return;
 
-        // Show analyzing message
-        const streamingDiv = document.createElement('div');
-        streamingDiv.className = 'streaming-animation';
-        streamingDiv.innerHTML = `Analyzing conversation<span class="streaming-dots">...</span>`;
-        section.appendChild(streamingDiv);
+        const bulletPoints = [
+            {
+                text: 'Customer is threatening chargeback action',
+                severity: 'HIGH'
+            },
+            {
+                text: 'Shows detailed knowledge of Fair Credit Billing Act',
+                severity: 'HIGH'
+            },
+            {
+                text: 'History of successful chargebacks detected',
+                severity: 'HIGH'
+            }
+        ];
 
-        // Add the three cards after delay
-        setTimeout(() => {
-            streamingDiv.remove();
-            
-            const chargebackCards = [
-                {
-                    title: 'Urgency Level',
-                    detail: 'High pressure for immediate action',
-                    severity: 'high'
-                },
-                {
-                    title: 'Excessive Chargeback Knowledge',
-                    detail: 'Matches patterns from past fraudulent claims',
-                    severity: 'high'
-                },
-                {
-                    title: 'Verification Process',
-                    detail: 'Customer avoiding standard verification steps',
-                    severity: 'medium'
-                }
-            ];
+        let currentIndex = 0;
 
-            chargebackCards.forEach(card => {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'risk-card';
-                cardElement.innerHTML = `
-                    <div class="card-content">
-                        <div class="card-header">
-                            <h4>${card.title}</h4>
-                            <span class="severity-badge ${card.severity.toLowerCase()}">${card.severity}</span>
+        function addNextBulletPoint() {
+            if (currentIndex < bulletPoints.length) {
+                // Show streaming animation
+                const streamingDiv = document.createElement('div');
+                streamingDiv.className = 'streaming-animation';
+                streamingDiv.innerHTML = `Analyzing conversation<span class="streaming-dots">...</span>`;
+                section.appendChild(streamingDiv);
+
+                setTimeout(() => {
+                    streamingDiv.remove();
+                    
+                    const bulletPoint = bulletPoints[currentIndex];
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'risk-card';
+                    cardElement.innerHTML = `
+                        <div class="card-content">
+                            <div class="card-header">
+                                <h4>${bulletPoint.text}</h4>
+                                <span class="severity-badge ${bulletPoint.severity.toLowerCase()}">${bulletPoint.severity}</span>
+                            </div>
                         </div>
-                        <p>${card.detail}</p>
-                    </div>
-                `;
-                section.appendChild(cardElement);
-            });
-        }, 3000);
-    }
+                    `;
+                    section.appendChild(cardElement);
+                    currentIndex++;
 
-    // Add new function to handle second chargeback threat analysis
-    function analyzeSecondChargebackThreat() {
-        console.log('Analyzing second chargeback threat...');
-        
-        const section = document.querySelector('#conversation-section ul');
-        if (!section) return;
+                    // If this was the last bullet point, update risk score
+                    if (currentIndex === bulletPoints.length) {
+                        setTimeout(() => {
+                            updateRiskScore(72, 'Severe Risk', '#ef4444');
+                        }, 1000);
+                    } else {
+                        addNextBulletPoint();
+                    }
+                }, 2000);
+            }
+        }
 
-        // Show analyzing message
-        const streamingDiv = document.createElement('div');
-        streamingDiv.className = 'streaming-animation';
-        streamingDiv.innerHTML = `Analyzing conversation<span class="streaming-dots">...</span>`;
-        section.appendChild(streamingDiv);
-
-        // Add the threatening language card after delay
-        setTimeout(() => {
-            streamingDiv.remove();
-            
-            const cardElement = document.createElement('div');
-            cardElement.className = 'risk-card';
-            cardElement.innerHTML = `
-                <div class="card-content">
-                    <div class="card-header">
-                        <h4>Threatening Language</h4>
-                        <span class="severity-badge high">HIGH</span>
-                    </div>
-                    <p>High severity (Related to Chargebacks)</p>
-                </div>
-            `;
-            section.appendChild(cardElement);
-        }, 3000);
+        // Start the sequence
+        section.innerHTML = '';
+        addNextBulletPoint();
     }
 
     // Example of a more concise card-based bullet point
@@ -612,7 +562,7 @@ document.addEventListener('DOMContentLoaded', function () {
             {
                 title: 'Delivery Status',
                 detail: 'Package was delivered with photo evidence',
-                severity: 'info',
+                severity: 'INFO',
                 action: {
                     text: 'View Photo',
                     handler: 'viewDeliveryPhoto()'
