@@ -261,6 +261,50 @@
         .text-xl[style*="Severe Risk"] {
             color: #ef4444 !important; /* Light red color for Severe Risk */
         }
+
+        .escalation-button-container {
+            margin-top: 20px;
+            padding: 10px;
+            text-align: right;
+        }
+
+        .escalate-button {
+            background-color: #dc2626;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .escalate-button:hover {
+            background-color: #b91c1c;
+        }
+
+        .escalate-button:disabled {
+            opacity: 0.7;
+            cursor: default;
+        }
+
+        .button-loader {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>

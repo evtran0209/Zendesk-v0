@@ -425,6 +425,47 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (currentIndex === additionalCards.length) {
                                 setTimeout(() => {
                                     updateRiskScore(85, 'Critical Risk', '#dc2626');
+                                    
+                                    // Add escalation button with fade-in animation
+                                    setTimeout(() => {
+                                        const buttonContainer = document.createElement('div');
+                                        buttonContainer.className = 'escalation-button-container';
+                                        buttonContainer.style.opacity = '0';
+                                        buttonContainer.style.transition = 'opacity 0.5s ease-in';
+                                        
+                                        buttonContainer.innerHTML = `
+                                            <button id="escalateButton" class="escalate-button">
+                                                <span class="button-text">Escalate</span>
+                                            </button>
+                                        `;
+                                        
+                                        section.appendChild(buttonContainer);
+                                        
+                                        // Trigger fade in
+                                        setTimeout(() => {
+                                            buttonContainer.style.opacity = '1';
+                                        }, 100);
+
+                                        // Add click handler
+                                        const escalateButton = buttonContainer.querySelector('#escalateButton');
+                                        escalateButton.addEventListener('click', () => {
+                                            // Show loading state
+                                            escalateButton.innerHTML = `
+                                                <span class="button-text">Generating Report...</span>
+                                                <div class="button-loader"></div>
+                                            `;
+                                            escalateButton.disabled = true;
+                                            
+                                            // Simulate report generation
+                                            setTimeout(() => {
+                                                escalateButton.innerHTML = `
+                                                    <span class="button-text">Report Generated ✓</span>
+                                                `;
+                                                // Optional: Show a toast or notification
+                                                alert('Escalation report generated and opened in new tab');
+                                            }, 2000);
+                                        });
+                                    }, 1000);
                                 }, 1000);
                             } else {
                                 setTimeout(() => {
