@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         setTimeout(() => {
                             streamingDiv.remove();
                             addNextCard();
-                        }, 2000);
+                        }, 4000);
                     }
                 }
             }
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 section.innerHTML = ''; // Clear initial analyzing message
                 addNextCard();
-            }, 2000);
+            }, 4000);
         }
     }
 
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             `;
             section.appendChild(cardElement);
-        }, 3000);
+        }, 4000);
     }
 
     // Update the ticket.comments.changed handler
@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 updateRiskScore(72, 'Severe Risk', '#ef4444');
             }, 1000);
-        }, 3000);
+        }, 4000);
     }
 
     // Second chargeback threat - two additional cards
@@ -427,61 +427,66 @@ document.addEventListener('DOMContentLoaded', function () {
                                     updateRiskScore(85, 'Critical Risk', '#dc2626');
                                     
                                     // Add escalation button with fade-in animation
+                                    const buttonContainer = document.createElement('div');
+                                    buttonContainer.className = 'escalation-button-container';
+                                    buttonContainer.style.opacity = '0';
+                                    buttonContainer.style.transition = 'opacity 0.5s ease-in';
+                                    
+                                    buttonContainer.innerHTML = `
+                                        <button id="escalateButton" class="escalate-button">
+                                            <span class="button-text">Escalate</span>
+                                        </button>
+                                    `;
+                                    
+                                    section.appendChild(buttonContainer);
+                                    
+                                    // Trigger fade in
                                     setTimeout(() => {
-                                        const buttonContainer = document.createElement('div');
-                                        buttonContainer.className = 'escalation-button-container';
-                                        buttonContainer.style.opacity = '0';
-                                        buttonContainer.style.transition = 'opacity 0.5s ease-in';
-                                        
-                                        buttonContainer.innerHTML = `
-                                            <button id="escalateButton" class="escalate-button">
-                                                <span class="button-text">Escalate</span>
-                                            </button>
+                                        buttonContainer.style.opacity = '1';
+                                    }, 100);
+
+                                    // Add click handler with new animation
+                                    const escalateButton = buttonContainer.querySelector('#escalateButton');
+                                    escalateButton.addEventListener('click', () => {
+                                        // Create special streaming container
+                                        const automationStream = document.createElement('div');
+                                        automationStream.className = 'automation-streaming';
+                                        automationStream.innerHTML = `
+                                            <div class="automation-text">
+                                                Suggested Resolution Automations<span class="automation-dots">...</span>
+                                            </div>
                                         `;
                                         
-                                        section.appendChild(buttonContainer);
+                                        // Replace button with streaming animation
+                                        buttonContainer.innerHTML = '';
+                                        buttonContainer.appendChild(automationStream);
                                         
-                                        // Trigger fade in
+                                        // Simulate automation suggestion
                                         setTimeout(() => {
-                                            buttonContainer.style.opacity = '1';
-                                        }, 100);
-
-                                        // Add click handler
-                                        const escalateButton = buttonContainer.querySelector('#escalateButton');
-                                        escalateButton.addEventListener('click', () => {
-                                            // Show loading state
-                                            escalateButton.innerHTML = `
-                                                <span class="button-text">Generating Report...</span>
-                                                <div class="button-loader"></div>
-                                            `;
-                                            escalateButton.disabled = true;
-                                            
-                                            // Simulate report generation
-                                            setTimeout(() => {
-                                                escalateButton.innerHTML = `
+                                            buttonContainer.innerHTML = `
+                                                <button id="escalateButton" class="escalate-button" disabled>
                                                     <span class="button-text">Report Generated ✓</span>
-                                                `;
-                                                // Optional: Show a toast or notification
-                                                alert('Escalation report generated and opened in new tab');
-                                            }, 2000);
-                                        });
-                                    }, 1000);
+                                                </button>
+                                            `;
+                                            alert('Escalation report generated and opened in new tab');
+                                        }, 4000);
+                                    });
                                 }, 1000);
                             } else {
                                 setTimeout(() => {
                                     addNextCard();
-                                }, 3000);
+                                }, 4000);
                             }
-                        }, 3000);
+                        }, 4000);
                     }
                 }
 
                 // Start adding the additional cards
                 setTimeout(() => {
                     addNextCard();
-                }, 2000);
+                }, 4000);
             }, 1000);
-        }, 3000);
+        }, 4000);
     }
 
     // Keep existing app.registered event
@@ -510,15 +515,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     ${data.severity.toUpperCase()}
                 </div>
             </div>
-            ${data.actions ? `
-                <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
-                    ${data.actions.map(action => `
-                        <button class="text-sm text-blue-600 hover:text-blue-800" onclick="${action.handler}">
-                            ${action.icon} ${action.label}
-                        </button>
-                    `).join('')}
-                </div>
-            ` : ''}
         `;
 
         return card;
@@ -530,13 +526,6 @@ document.addEventListener('DOMContentLoaded', function () {
         detail: 'Multiple accounts created from same IP in last 24h',
         severity: 'high',
         icon: '⚠️',
-        actions: [
-            {
-                label: 'View Details',
-                icon: '👁️',
-                handler: 'viewAccountDetails()'
-            }
-        ]
     };
 
     // Update the risk indicators to be more concise
@@ -677,11 +666,7 @@ document.addEventListener('DOMContentLoaded', function () {
             {
                 title: 'Delivery Status',
                 detail: 'Package was delivered with photo evidence',
-                severity: 'INFO',
-                action: {
-                    text: 'View Photo',
-                    handler: 'viewDeliveryPhoto()'
-                }
+                severity: 'INFO'
             },
             {
                 title: 'Claim Verification',
@@ -703,11 +688,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span class="severity-badge ${card1.severity.toLowerCase()}">${card1.severity}</span>
                     </div>
                     <p>${card1.detail}</p>
-                    ${card1.action ? `
-                        <button onclick="${card1.action.handler}" class="action-link">
-                            ${card1.action.text}
-                        </button>
-                    ` : ''}
                 </div>
             `;
             section.appendChild(cardElement1);
@@ -734,7 +714,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 `;
                 section.appendChild(cardElement2);
-            }, 2000);
-        }, 2000);
+            }, 4000);
+        }, 4000);
     }
 });
