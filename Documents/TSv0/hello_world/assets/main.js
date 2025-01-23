@@ -353,69 +353,94 @@ document.addEventListener('DOMContentLoaded', function () {
         const section = document.querySelector('#conversation-section ul');
         if (!section) return;
 
+        // Show initial streaming animation
         const streamingDiv = document.createElement('div');
         streamingDiv.className = 'streaming-animation';
         streamingDiv.innerHTML = `Analyzing conversation<span class="streaming-dots">...</span>`;
         section.appendChild(streamingDiv);
 
-        const additionalCards = [
-            {
-                title: 'Refund Demand Pattern',
-                detail: 'Immediate refund demand with legal pressure. Pattern linked to Device IP',
-                severity: 'HIGH'
-            },
-            {
-                title: 'Urgency Pattern',
-                detail: 'High pressure tactics and previous chargeback history',
-                severity: 'HIGH'
-            }
-        ];
-
-        let currentIndex = 0;
-
-        function addNextCard() {
-            if (currentIndex < additionalCards.length) {
-                const streamingDiv = document.createElement('div');
-                streamingDiv.className = 'streaming-animation';
-                streamingDiv.innerHTML = `Analyzing conversation<span class="streaming-dots">...</span>`;
-                section.appendChild(streamingDiv);
-
-                setTimeout(() => {
-                    streamingDiv.remove();
-                    
-                    const card = additionalCards[currentIndex];
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'risk-card';
-                    cardElement.innerHTML = `
-                        <div class="card-content">
-                            <div class="card-header">
-                                <h4>${card.title}</h4>
-                                <span class="severity-badge ${card.severity.toLowerCase()}">${card.severity}</span>
-                            </div>
-                            <p>${card.detail}</p>
-                        </div>
-                    `;
-                    section.appendChild(cardElement);
-                    currentIndex++;
-
-                    // Update risk score after last card to 85%
-                    if (currentIndex === additionalCards.length) {
-                        setTimeout(() => {
-                            updateRiskScore(85, 'Critical Risk', '#dc2626');
-                        }, 1000);
-                    } else {
-                        setTimeout(() => {
-                            addNextCard();
-                        }, 3000);
-                    }
-                }, 3000);
-            }
-        }
-
+        // First show the Chargeback Threat card
         setTimeout(() => {
             streamingDiv.remove();
-            addNextCard();
-        }, 2000);
+            
+            const firstCard = document.createElement('div');
+            firstCard.className = 'risk-card';
+            firstCard.innerHTML = `
+                <div class="card-content">
+                    <div class="card-header">
+                        <h4>Chargeback Threat Detected</h4>
+                        <span class="severity-badge high">HIGH</span>
+                    </div>
+                    <p>Customer threatened chargeback actions to 1 other retailer in network this week</p>
+                </div>
+            `;
+            section.appendChild(firstCard);
+
+            // Update risk score to 72% after first card
+            setTimeout(() => {
+                updateRiskScore(72, 'Severe Risk', '#ef4444');
+                
+                // Then proceed with the existing two cards
+                const additionalCards = [
+                    {
+                        title: 'Refund Demand Pattern',
+                        detail: 'Immediate refund demand with legal pressure. Pattern linked to Device IP',
+                        severity: 'HIGH'
+                    },
+                    {
+                        title: 'Urgency Pattern',
+                        detail: 'High pressure tactics and previous chargeback history',
+                        severity: 'HIGH'
+                    }
+                ];
+
+                let currentIndex = 0;
+
+                function addNextCard() {
+                    if (currentIndex < additionalCards.length) {
+                        const streamingDiv = document.createElement('div');
+                        streamingDiv.className = 'streaming-animation';
+                        streamingDiv.innerHTML = `Analyzing conversation<span class="streaming-dots">...</span>`;
+                        section.appendChild(streamingDiv);
+
+                        setTimeout(() => {
+                            streamingDiv.remove();
+                            
+                            const card = additionalCards[currentIndex];
+                            const cardElement = document.createElement('div');
+                            cardElement.className = 'risk-card';
+                            cardElement.innerHTML = `
+                                <div class="card-content">
+                                    <div class="card-header">
+                                        <h4>${card.title}</h4>
+                                        <span class="severity-badge ${card.severity.toLowerCase()}">${card.severity}</span>
+                                    </div>
+                                    <p>${card.detail}</p>
+                                </div>
+                            `;
+                            section.appendChild(cardElement);
+                            currentIndex++;
+
+                            // Update risk score after last card to 85%
+                            if (currentIndex === additionalCards.length) {
+                                setTimeout(() => {
+                                    updateRiskScore(85, 'Critical Risk', '#dc2626');
+                                }, 1000);
+                            } else {
+                                setTimeout(() => {
+                                    addNextCard();
+                                }, 3000);
+                            }
+                        }, 3000);
+                    }
+                }
+
+                // Start adding the additional cards
+                setTimeout(() => {
+                    addNextCard();
+                }, 2000);
+            }, 1000);
+        }, 3000);
     }
 
     // Keep existing app.registered event
