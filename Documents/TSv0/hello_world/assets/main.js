@@ -183,6 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             conversationSection.className = 'risk-section';
                             conversationSection.innerHTML = `
                                 <div class="section-header">
+                                    <span class="section-icon">💬</span>
                                     <span class="section-title">Conversation Behavior</span>
                                 </div>
                                 <ul style="margin: 0; padding: 0; list-style: none;"></ul>
@@ -225,7 +226,8 @@ document.addEventListener('DOMContentLoaded', function () {
             conversationSection.className = 'risk-section';
             conversationSection.innerHTML = `
                 <div class="section-header">
-                    <span class="section-title">Conversation Analysis</span>
+                    <span class="section-icon">💬</span>
+                    <span class="section-title">Conversation Behavior</span>
                 </div>
                 <ul style="margin: 0; padding: 0; list-style: none;"></ul>
             `;
@@ -453,7 +455,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         automationStream.className = 'automation-streaming';
                                         automationStream.innerHTML = `
                                             <div class="automation-text">
-                                                Suggested Resolution Automations<span class="automation-dots">...</span>
+                                                Suggesting Resolution Tasks<span class="automation-dots">...</span>
                                             </div>
                                         `;
                                         
@@ -645,6 +647,7 @@ document.addEventListener('DOMContentLoaded', function () {
             proofSection.className = 'risk-section';
             proofSection.innerHTML = `
                 <div class="section-header">
+                    <span class="section-icon">📦</span>
                     <span class="section-title">Proof of Delivery</span>
                 </div>
                 <ul style="margin: 0; padding: 0; list-style: none;"></ul>
