@@ -1,11 +1,17 @@
 document.addEventListener('DOMContentLoaded', function () {
     console.log('Widget Initialized');
-    var client = ZAFClient.init();
-    client.invoke('resize', { width: '100%', height: '600px' });
+    const client = ZAFClient.init();
+    client.invoke('resize', { width: '420px', height: '600px' });  // Adjusted width
 
     // Add CSS for sticky risk score
     const styleSheet = document.createElement("style");
     styleSheet.textContent = `
+        body {
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
         .risk-score-sticky {
             position: sticky;
             top: 0;
@@ -14,10 +20,44 @@ document.addEventListener('DOMContentLoaded', function () {
             z-index: 100;
             border-bottom: 1px solid #eee;
             margin: -16px -16px 16px -16px;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .risk-summary {
             padding: 16px;
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .risk-section {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card-content {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+
+        .card-header h4 {
+            flex: 1;
+            margin-right: 8px;
+        }
+
+        .severity-badge {
+            white-space: nowrap;
         }
     `;
     document.head.appendChild(styleSheet);
@@ -531,7 +571,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Keep existing app.registered event
     client.on('app.registered', function() {
         console.log('App registered and ready');
-        client.invoke('resize', { width: '100%', height: '600px' });
+        client.invoke('resize', { width: '420px', height: '600px' });
         startMessageSequence();
     });
 
