@@ -10,18 +10,32 @@ document.addEventListener('DOMContentLoaded', function () {
             width: 100%;
             box-sizing: border-box;
             overflow-x: hidden;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            padding-top: 80px; /* Add space for the sticky header */
+            position: relative;
+            box-sizing: border-box;
         }
 
         .risk-score-sticky {
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 50%;
+            transform: translateX(-50%);
             background: white;
             padding: 16px;
             z-index: 100;
             border-bottom: 1px solid #eee;
-            margin: -16px -16px 16px -16px;
             width: 100%;
+            max-width: 420px;
             box-sizing: border-box;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .risk-summary {
@@ -74,9 +88,10 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     `;
 
-    // Insert the sticky risk score at the top of the risk-summary
+    // Insert the sticky risk score at the top of the risk-summary only if it doesn't exist
     const riskSummary = document.querySelector('.risk-summary');
-    if (riskSummary) {
+    const existingRiskScore = document.querySelector('.risk-score-sticky');
+    if (riskSummary && !existingRiskScore) {
         riskSummary.insertAdjacentHTML('afterbegin', riskScoreHtml);
     }
 
