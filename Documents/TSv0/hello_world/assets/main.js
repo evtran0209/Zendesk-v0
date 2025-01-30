@@ -3,13 +3,50 @@ document.addEventListener('DOMContentLoaded', function () {
     var client = ZAFClient.init();
     client.invoke('resize', { width: '100%', height: '600px' });
 
+    // Add CSS for sticky risk score
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+        .risk-score-sticky {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 16px;
+            z-index: 100;
+            border-bottom: 1px solid #eee;
+            margin: -16px -16px 16px -16px;
+        }
+        
+        .risk-summary {
+            padding: 16px;
+        }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // Wrap the risk score elements in a sticky container
+    const riskScoreHtml = `
+        <div class="risk-score-sticky">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div class="text-3xl font-bold">28%</div>
+                    <div class="text-xl" style="color: #eab308">Slight Risk</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Insert the sticky risk score at the top of the risk-summary
+    const riskSummary = document.querySelector('.risk-summary');
+    if (riskSummary) {
+        riskSummary.insertAdjacentHTML('afterbegin', riskScoreHtml);
+    }
+
     // Flag to prevent multiple sequences
     let isSequenceRunning = false;
 
     // Function to update risk score with animation
     function updateRiskScore(score, riskLevel, color) {
-        const scoreDiv = document.querySelector('.text-3xl');
-        const riskLevelDiv = document.querySelector('.text-xl');
+        const scoreDiv = document.querySelector('.risk-score-sticky .text-3xl');
+        const riskLevelDiv = document.querySelector('.risk-score-sticky .text-xl');
         
         // Show loading animation
         scoreDiv.textContent = 'Score updating';
@@ -669,7 +706,8 @@ document.addEventListener('DOMContentLoaded', function () {
             {
                 title: 'Delivery Status',
                 detail: 'Package was delivered with photo evidence',
-                severity: 'INFO'
+                severity: 'INFO',
+                evidence: true
             },
             {
                 title: 'Claim Verification',
@@ -691,9 +729,34 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span class="severity-badge ${card1.severity.toLowerCase()}">${card1.severity}</span>
                     </div>
                     <p>${card1.detail}</p>
+                    ${card1.evidence ? `
+                        <div class="evidence-container">
+                            <button class="view-evidence-btn">View</button>
+                            <div class="evidence-photo" style="display: none;">
+                                <img src="delivery-evidence.jpg" 
+                                     alt="Delivery Evidence" 
+                                     style="width: 100%; max-width: 300px; border-radius: 4px;">
+                            </div>
+                        </div>
+                    ` : ''}
                 </div>
             `;
             section.appendChild(cardElement1);
+
+            // Add click handler for the view button
+            const viewButton = cardElement1.querySelector('.view-evidence-btn');
+            if (viewButton) {
+                viewButton.addEventListener('click', function() {
+                    const photoDiv = cardElement1.querySelector('.evidence-photo');
+                    if (photoDiv.style.display === 'none') {
+                        photoDiv.style.display = 'block';
+                        viewButton.textContent = 'Hide';
+                    } else {
+                        photoDiv.style.display = 'none';
+                        viewButton.textContent = 'View';
+                    }
+                });
+            }
 
             // Show streaming animation before second card
             const streamingDiv = document.createElement('div');
