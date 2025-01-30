@@ -65,10 +65,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Wrap the risk score elements in a sticky container
     const riskScoreHtml = `
         <div class="risk-score-sticky">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <div class="text-3xl font-bold">28%</div>
-                    <div class="text-xl" style="color: #eab308">Slight Risk</div>
+            <div class="flex items-center justify-center mb-4">
+                <div class="text-center">
+                    <div class="text-3xl font-bold">0%</div>
+                    <div class="text-xl" style="color: #22c55e">No Risk</div>
                 </div>
             </div>
         </div>
@@ -97,13 +97,13 @@ document.addEventListener('DOMContentLoaded', function () {
         dots.textContent = '...';
         scoreDiv.appendChild(dots);
 
-        // Update score after 2 seconds
+        // Update score after 4 seconds
         setTimeout(() => {
             scoreDiv.textContent = `${score}%`;
             scoreDiv.style.opacity = '1';
             riskLevelDiv.textContent = riskLevel;
             riskLevelDiv.style.color = color;
-        }, 2000);
+        }, 4000);
     }
 
     // Function to show streaming animation
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
         streamingDiv.appendChild(dots);
 
         section.appendChild(streamingDiv);
-        return streamingDiv;
+        return new Promise(resolve => setTimeout(resolve, 4000));
     }
 
     // Function to add a message with fade-in effect
