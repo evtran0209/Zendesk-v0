@@ -1,9 +1,9 @@
 {
-  "name": "GOAT",
+  "name": "Staples",
   "author": {
-    "name": "GOAT",
-    "email": "support@GOAT.com",
-    "url": "https://GOAT.com"
+    "name": "Staples",
+    "email": "support@Staples.com",
+    "url": "https://Staples.com"
   },
   "defaultLocale": "en",
   "private": true,
