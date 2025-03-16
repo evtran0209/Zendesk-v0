@@ -18,3 +18,6 @@ Thumbs.db
 
 # Node modules
 node_modules/
+
+# Ignore old directory
+hello_world/
